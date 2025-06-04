@@ -2,7 +2,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :sessions, only: [:index, :show, :create] do
-      resources :participations, only: [:create]
+      resources :attendances, only: [:create]
     end
   end
 

@@ -2,19 +2,19 @@
 
 ## Backend
 
-- [ ] Initialiser projet Rails API  
-- [ ] Créer modèle Session (date, nom, recap, statut)  
-- [ ] Créer modèle Player (nom)  
-- [ ] Créer modèle Attendance (référence Player et Session, présence booléenne, apports texte)  
-- [ ] Définir relations ActiveRecord  
+- [x] Initialiser projet Rails API  
+- [x] Créer modèle Session (date, nom, recap, statut)  
+- [x] Créer modèle Player (nom)  
+- [x] Créer modèle Attendance (référence Player et Session, présence booléenne, apports texte)  
+- [x] Définir relations ActiveRecord  
 - [ ] Implémenter contrôleurs API pour Session et Attendance  
 - [ ] Routes API RESTful  
 - [ ] Tester API avec Postman ou curl  
 
 ## Frontend
 
-- [ ] Initialiser projet Vue 3  
-- [ ] Afficher session à venir (date, nom)  
+- [x] Initialiser projet Vue 3  
+- [x] Afficher session à venir (date, nom)  
 - [ ] Afficher récapitulatif session précédente  
 - [ ] Formulaire joueurs : confirmer présence, ajouter apports  
 - [ ] Formulaire MJ : créer/modifier session (date, nom, recap)  

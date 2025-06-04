@@ -1,4 +1,4 @@
 class Session < ApplicationRecord
-    has_many :participations
-    has_many :players, through: :participations
+    has_many :attendances
+    has_many :players, through: :attendances
 end

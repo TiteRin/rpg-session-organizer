@@ -10,7 +10,7 @@
 
 # Clear existing data
 puts "Cleaning database..."
-Participation.destroy_all
+Attendance.destroy_all
 Session.destroy_all
 Player.destroy_all
 
@@ -57,12 +57,12 @@ sessions.each do |session_data|
   Session.create!(session_data)
 end
 
-# Create participations
-puts "Creating participations..."
+# Create attendances
+puts "Creating attendances..."
 # Past sessions (1 and 2)
 Session.where("scheduled_at < ?", Time.current).each do |session|
   Player.all.each do |player|
-    Participation.create!(
+    Attendance.create!(
       player: player,
       session: session,
       presence: [true, false].sample,
@@ -74,7 +74,7 @@ end
 # Future sessions (3 and 4)
 Session.where("scheduled_at > ?", Time.current).each do |session|
   Player.all.each do |player|
-    Participation.create!(
+    Attendance.create!(
       player: player,
       session: session,
       presence: [true, false].sample,
