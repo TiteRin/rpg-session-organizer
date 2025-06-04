@@ -1,0 +1,25 @@
+# .gitignore
+
+# Rails
+/backend/log/*
+/backend/tmp/*
+/backend/vendor/bundle
+/backend/.byebug_history
+/backend/node_modules
+
+# Ruby
+*.gem
+*.rbc
+.bundle
+config/master.key
+*.sqlite3
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Node
+/frontend/node_modules
+
+# Vscode / Cursor (si tu utilises VSCode-based Cursor)
+/.vscode
+/.cursor
+/.idea
