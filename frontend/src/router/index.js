@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Sessions from '../views/Sessions.vue'
+import SessionDetail from '../views/SessionDetail.vue'
 
 const routes = [
   {
@@ -10,6 +11,11 @@ const routes = [
     path: '/sessions',
     name: 'Sessions',
     component: Sessions
+  },
+  {
+    path: '/sessions/:id',
+    name: 'SessionDetail',
+    component: SessionDetail
   }
 ]
 

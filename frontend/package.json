@@ -10,15 +10,19 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
+    "lucide-vue-next": "^0.513.0",
     "vue": "^3.5.13",
     "vue-router": "4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@types/node": "^22.15.29",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.21",
     "daisyui": "^5.0.43",
     "postcss": "^8.5.4",
     "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3",
     "vite": "^6.3.5"
   }
 }
