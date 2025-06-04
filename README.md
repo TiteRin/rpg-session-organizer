@@ -28,8 +28,8 @@ rails server
 
 ```bash
 cd frontend
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 ## Architecture
