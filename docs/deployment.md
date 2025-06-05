@@ -16,6 +16,9 @@ Ce document décrit la procédure de déploiement de l'application sur Railway, 
 
 #### 1. Configuration Backend (`railway.toml`)
 ```toml
+[phases.setup]
+nixPkgs = ["ruby", "bundler"]
+
 [build]
 builder = "nixpacks"
 buildCommand = "cd backend && bundle install"
@@ -26,10 +29,13 @@ healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 ```
 
-> **Note** : Pour un monorepo, nous déployons d'abord le backend, puis le frontend séparément. Chaque service a son propre projet Railway.
+> **Note** : La section `[phases.setup]` est nécessaire pour installer Ruby et Bundler dans l'environnement de build. Sans cela, les commandes `bundle` ne fonctionneront pas.
 
 #### 2. Configuration Frontend (à configurer après le déploiement du backend)
 ```toml
+[phases.setup]
+nixPkgs = ["nodejs", "npm"]
+
 [build]
 builder = "nixpacks"
 buildCommand = "cd frontend && npm install && npm run build"

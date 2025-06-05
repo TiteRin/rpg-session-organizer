@@ -1,3 +1,6 @@
+[phases.setup]
+nixPkgs = ["ruby", "bundler"]
+
 [build]
 builder = "nixpacks"
 buildCommand = "cd backend && bundle install"
