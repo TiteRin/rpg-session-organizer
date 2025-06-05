@@ -1,13 +1,27 @@
 [phases.setup]
-nixPkgs = ["ruby", "bundler"]
+nixPkgs = ["ruby", "bundler", "nodejs", "npm"]
 
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "Dockerfile.backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
 
 [deploy.services]
-backend = { path = "backend" }
-frontend = { path = "frontend" } 
+backend = { 
+  path = "backend",
+  dockerfilePath = "Dockerfile.backend",
+  env = {
+    RAILS_ENV = "production",
+    RAILS_LOG_TO_STDOUT = "true",
+    RAILS_SERVE_STATIC_FILES = "true"
+  }
+}
+frontend = { 
+  path = "frontend",
+  dockerfilePath = "Dockerfile.frontend",
+  env = { 
+    VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app"
+  }
+} 

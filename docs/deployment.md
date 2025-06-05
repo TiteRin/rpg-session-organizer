@@ -36,10 +36,10 @@ Le script `entrypoint.sh` est un composant crucial du déploiement qui :
 - Redirige les logs vers la sortie standard pour une meilleure visibilité dans Railway
 
 Ce script est référencé dans :
-1. Le `Dockerfile` comme point d'entrée du conteneur
+1. Le `Dockerfile.backend` comme point d'entrée du conteneur
 2. Le `railway.toml` comme commande de démarrage
 
-##### Dockerfile (`Dockerfile` à la racine)
+##### Dockerfile Backend (`Dockerfile.backend` à la racine)
 ```dockerfile
 FROM ruby:3.3.0
 
@@ -70,23 +70,60 @@ ENTRYPOINT ["entrypoint.sh"]
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout"]
 ```
 
-> **Note** : Le Dockerfile est placé à la racine du projet pour faciliter le build dans Railway. Les chemins sont ajustés pour pointer vers les fichiers dans le répertoire `backend/`.
+##### Dockerfile Frontend (`Dockerfile.frontend` à la racine)
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the frontend application
+COPY frontend/ .
+
+# Build the application
+RUN npm run build
+
+# Expose the port
+EXPOSE 4173
+
+# Start the application
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
+```
 
 ##### Configuration Railway (`railway.toml`)
 ```toml
 [phases.setup]
-nixPkgs = ["ruby", "bundler"]
+nixPkgs = ["ruby", "bundler", "nodejs", "npm"]
 
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "Dockerfile.backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
 
 [deploy.services]
-backend = { path = "backend" }
-frontend = { path = "frontend" }
+backend = { 
+  path = "backend",
+  dockerfilePath = "Dockerfile.backend",
+  env = {
+    RAILS_ENV = "production",
+    RAILS_LOG_TO_STDOUT = "true",
+    RAILS_SERVE_STATIC_FILES = "true"
+  }
+}
+frontend = { 
+  path = "frontend",
+  dockerfilePath = "Dockerfile.frontend",
+  env = { 
+    VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app"
+  }
+}
 ```
 
 #### 2. Configuration Frontend (à configurer après le déploiement du backend)
@@ -162,43 +199,145 @@ Dans un même projet Railway, nous configurons deux environnements :
 
 ## Configuration Railway
 
-### 1. Création du Projet
+### 1. Configuration du Projet
 
+#### Option 1 : Projet Existant (Recommandé)
+1. Dans votre projet Railway existant, cliquer sur "New Service"
+2. Sélectionner "Deploy from GitHub repo"
+3. Choisir le même repository
+4. Railway va automatiquement :
+   - Détecter le fichier `railway.toml`
+   - Créer les deux services (backend et frontend) définis dans ce fichier
+   - Configurer chaque service selon les paramètres spécifiés
+
+#### Option 2 : Nouveau Projet
 1. Aller sur [Railway](https://railway.app)
 2. Cliquer sur "New Project"
 3. Sélectionner "Deploy from GitHub repo"
 4. Choisir le repository
+5. Railway va automatiquement :
+   - Détecter le fichier `railway.toml`
+   - Créer les deux services (backend et frontend) définis dans ce fichier
+   - Configurer chaque service selon les paramètres spécifiés
 
-### 2. Configuration des Environnements
+> **Important** : 
+> - Vous n'avez pas besoin de créer manuellement les services dans l'interface Railway
+> - Les services sont créés automatiquement en fonction du `railway.toml`
+> - Si vous utilisez l'Option 2, assurez-vous de recréer la base de données
 
-1. Dans le projet Railway, aller dans "Settings" > "Environments"
-2. Créer deux environnements :
-   - `staging`
-   - `production`
-3. Pour chaque environnement :
-   - Configurer les variables d'environnement spécifiques
-   - Créer une base de données PostgreSQL dédiée
+### 2. Gestion de la Base de Données
 
-### 3. Configuration des Déploiements
+> **Important** : Si vous recréez le projet :
+> - Ne supprimez PAS la base de données PostgreSQL existante
+> - La variable `DATABASE_URL` sera automatiquement configurée
+> - Vous pouvez supprimer l'ancien service, il sera recréé avec la bonne configuration
 
-1. Dans "Settings" > "Git"
-2. Configurer les déploiements automatiques :
-   - Pour l'environnement staging :
-     - Branche : `staging`
-     - Environnement : `staging`
-   - Pour l'environnement production :
-     - Branche : `main`
-     - Environnement : `production`
-
-### 4. Configuration des Bases de Données
-
-Pour chaque environnement :
-
-1. Dans l'onglet de l'environnement, cliquer sur "New"
+Pour configurer la base de données :
+1. Dans le projet Railway, cliquer sur "New"
 2. Sélectionner "Database" > "PostgreSQL"
-3. Railway créera automatiquement :
-   - Une base de données PostgreSQL
-   - La variable d'environnement `DATABASE_URL` spécifique à l'environnement
+3. Railway va :
+   - Créer une nouvelle base de données
+   - Configurer automatiquement la variable `DATABASE_URL`
+   - Fournir les informations de connexion
+
+### 3. Configuration Multi-Services
+
+Notre application utilise une architecture multi-services, configurée via le fichier `railway.toml`. Ce fichier définit deux services qui seront automatiquement créés par Railway :
+
+#### Configuration dans railway.toml
+```toml
+[phases.setup]
+nixPkgs = ["ruby", "bundler", "nodejs", "npm"]
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.backend"
+
+[deploy]
+startCommand = "entrypoint.sh"
+
+[deploy.services]
+backend = { 
+  path = "backend",
+  dockerfilePath = "Dockerfile.backend",
+  env = {
+    RAILS_ENV = "production",
+    RAILS_LOG_TO_STDOUT = "true",
+    RAILS_SERVE_STATIC_FILES = "true"
+  }
+}
+frontend = { 
+  path = "frontend",
+  dockerfilePath = "Dockerfile.frontend",
+  env = { 
+    VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app"
+  }
+}
+```
+
+Cette configuration :
+- Définit les deux services (backend et frontend)
+- Spécifie le chemin et le Dockerfile pour chaque service
+- Configure les variables d'environnement nécessaires
+
+#### Service Backend (Rails)
+- **Path** : `backend/`
+- **Dockerfile** : `Dockerfile.backend`
+- **Variables d'environnement requises** :
+  ```
+  RAILS_ENV=production
+  RAILS_MASTER_KEY=<valeur_du_master_key>
+  DATABASE_URL=<fourni par Railway>
+  RAILS_LOG_TO_STDOUT=true
+  RAILS_SERVE_STATIC_FILES=true
+  ```
+
+#### Service Frontend (Vue.js)
+- **Path** : `frontend/`
+- **Dockerfile** : `Dockerfile.frontend`
+- **Variables d'environnement requises** :
+  ```
+  VITE_API_URL=<url_du_backend>
+  ```
+
+### 4. Fichiers de Configuration
+
+#### Dockerfile.frontend
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the frontend application
+COPY frontend/ .
+
+# Build the application
+RUN npm run build
+
+# Expose the port
+EXPOSE 4173
+
+# Start the application
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
+```
+
+### 5. URLs des Services
+
+Une fois déployés, chaque service aura sa propre URL :
+- Backend : `https://rpg-session-organizer-staging.up.railway.app`
+- Frontend : Une URL différente fournie par Railway
+
+> **Note** : 
+> - Les services sont créés automatiquement par Railway en fonction du `railway.toml`
+> - Chaque service a ses propres logs et métriques
+> - Les services peuvent être redémarrés ou mis à l'échelle séparément
+> - Le frontend doit pointer vers l'URL du backend via la variable `VITE_API_URL`
 
 ## Variables d'environnement
 
@@ -321,12 +460,12 @@ Pour chaque environnement, configurer :
 
 #### Staging
 ```
-VITE_API_URL=https://rpg-session-organizer-staging-backend.up.railway.app
+VITE_API_URL=https://rpg-session-organizer-staging.up.railway.app
 ```
 
 #### Production
 ```
-VITE_API_URL=https://rpg-session-organizer-prod-backend.up.railway.app
+VITE_API_URL=https://rpg-session-organizer-prod.up.railway.app
 ```
 
 ## Configuration des Credentials
