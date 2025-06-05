@@ -237,15 +237,8 @@ buildContext = "backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
-healthcheckPath = "/health"
-healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-
-[deploy.env]
-RAILS_ENV = "production"
-RAILS_LOG_TO_STDOUT = "true"
-RAILS_SERVE_STATIC_FILES = "true"
 ```
 
 #### Frontend (`frontend/railway.toml`)
@@ -259,20 +252,15 @@ dockerfilePath = "frontend/Dockerfile"
 buildContext = "frontend"
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-
-[deploy.env]
-VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app"
 ```
 
 > **Note** : 
 > - Les Dockerfiles sont placés dans leurs répertoires respectifs (`backend/Dockerfile` et `frontend/Dockerfile`)
 > - Les chemins dans les Dockerfiles sont relatifs au contexte de build spécifié dans `railway.toml`
 > - Le `buildContext` dans `railway.toml` indique le répertoire à partir duquel les fichiers seront copiés
-> - Les variables d'environnement spécifiques à chaque service sont configurées dans l'interface Railway
+> - Les variables d'environnement doivent être configurées dans l'interface Railway pour une meilleure sécurité et flexibilité
 > - Chaque service a sa propre configuration dans son répertoire pour une meilleure organisation et maintenance
 
 ## Variables d'environnement

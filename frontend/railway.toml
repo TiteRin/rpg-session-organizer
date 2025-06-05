@@ -7,10 +7,5 @@ dockerfilePath = "frontend/Dockerfile"
 buildContext = "frontend"
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-
-[deploy.env]
-VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app" 
+restartPolicyMaxRetries = 10 

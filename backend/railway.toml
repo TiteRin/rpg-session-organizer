@@ -8,12 +8,6 @@ buildContext = "backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
-healthcheckPath = "/health"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
 
-[deploy.env]
-RAILS_ENV = "production"
-RAILS_LOG_TO_STDOUT = "true"
-RAILS_SERVE_STATIC_FILES = "true" 
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10 
