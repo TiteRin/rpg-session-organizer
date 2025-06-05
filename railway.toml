@@ -1,9 +1,10 @@
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'No build command needed for monorepo'"
+buildCommand = "cd backend && bundle install"
 
 [deploy]
-healthcheckPath = "/"
+startCommand = "cd backend && bundle exec rails server -b 0.0.0.0"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 
 [deploy.services]

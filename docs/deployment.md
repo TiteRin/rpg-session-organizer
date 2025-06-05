@@ -14,43 +14,28 @@ Ce document décrit la procédure de déploiement de l'application sur Railway, 
 
 ### Fichiers de configuration Railway
 
-#### 1. Configuration racine (`railway.toml`)
+#### 1. Configuration Backend (`railway.toml`)
 ```toml
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'No build command needed for monorepo'"
+buildCommand = "cd backend && bundle install"
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 100
-
-[deploy.services]
-backend = { path = "backend" }
-frontend = { path = "frontend" }
-```
-
-> **Note** : Les commandes de démarrage sont définies dans les fichiers `railway.toml` individuels de chaque service. Le fichier racine ne fait que définir la structure du monorepo.
-
-#### 2. Configuration Backend (`backend/railway.toml`)
-```toml
-[build]
-builder = "nixpacks"
-buildCommand = "bundle install"
-
-[deploy]
-startCommand = "bundle exec rails server -b 0.0.0.0"
+startCommand = "cd backend && bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 ```
 
-#### 3. Configuration Frontend (`frontend/railway.toml`)
+> **Note** : Pour un monorepo, nous déployons d'abord le backend, puis le frontend séparément. Chaque service a son propre projet Railway.
+
+#### 2. Configuration Frontend (à configurer après le déploiement du backend)
 ```toml
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npm run build"
+buildCommand = "cd frontend && npm install && npm run build"
 
 [deploy]
-startCommand = "npm run preview"
+startCommand = "cd frontend && npm run preview"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 ```
