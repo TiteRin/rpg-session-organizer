@@ -8,7 +8,8 @@ dockerfilePath = "Dockerfile"
 [deploy]
 startCommand = "entrypoint.sh"
 healthcheckPath = "/api/health"
-healthcheckTimeout = 100
+healthcheckTimeout = 300
+healthcheckInitialDelay = 60
 
 [deploy.services]
 backend = { path = "backend" }
