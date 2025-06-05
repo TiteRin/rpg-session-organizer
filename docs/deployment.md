@@ -24,8 +24,6 @@ buildCommand = "echo 'No build command needed for monorepo'"
 startCommand = "echo 'No start command needed for monorepo'"
 healthcheckPath = "/"
 healthcheckTimeout = 100
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10
 
 [deploy.services]
 backend = { path = "backend" }
@@ -42,8 +40,6 @@ buildCommand = "bundle install"
 startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/"
 healthcheckTimeout = 100
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10
 ```
 
 #### 3. Configuration Frontend (`frontend/railway.toml`)
@@ -56,8 +52,6 @@ buildCommand = "npm install && npm run build"
 startCommand = "npm run preview"
 healthcheckPath = "/"
 healthcheckTimeout = 100
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10
 ```
 
 ### Configuration de la Base de Données

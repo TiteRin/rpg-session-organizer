@@ -5,6 +5,4 @@ buildCommand = "npm install && npm run build"
 [deploy]
 startCommand = "npm run preview"
 healthcheckPath = "/"
-healthcheckTimeout = 100
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10 
+healthcheckTimeout = 100 
