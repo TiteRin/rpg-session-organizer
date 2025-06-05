@@ -4,5 +4,10 @@ set -e
 # Remove a potentially pre-existing server.pid for Rails
 rm -f /app/tmp/pids/server.pid
 
-# Then exec the container's main process (what's set as CMD in the Dockerfile)
-exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080} 
+# Wait for the application to be ready
+echo "Waiting for application to be ready..."
+sleep 30
+
+# Start the Rails server
+echo "Starting Rails server..."
+exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080} --log-to-stdout 
