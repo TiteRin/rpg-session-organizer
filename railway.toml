@@ -2,11 +2,11 @@
 nixPkgs = ["ruby", "bundler"]
 
 [build]
-builder = "nixpacks"
-buildCommand = "cd backend && bundle install"
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-startCommand = "cd backend && bundle exec rails server -b 0.0.0.0"
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 

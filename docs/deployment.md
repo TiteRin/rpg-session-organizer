@@ -14,22 +14,64 @@ Ce document décrit la procédure de déploiement de l'application sur Railway, 
 
 ### Fichiers de configuration Railway
 
-#### 1. Configuration Backend (`railway.toml`)
-```toml
-[phases.setup]
-nixPkgs = ["ruby", "bundler"]
+#### 1. Configuration Backend
 
+##### Dockerfile (`backend/Dockerfile`)
+```dockerfile
+FROM ruby:3.3.0
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update -qq && \
+    apt-get install -y build-essential libpq-dev
+
+# Install bundler
+RUN gem install bundler
+
+# Copy Gemfile and Gemfile.lock
+COPY Gemfile Gemfile.lock ./
+
+# Install dependencies
+RUN bundle install
+
+# Copy the rest of the application
+COPY . .
+
+# Add a script to be executed every time the container starts
+COPY entrypoint.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
+
+# Start the main process
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+```
+
+##### Script d'entrée (`backend/entrypoint.sh`)
+```bash
+#!/bin/bash
+set -e
+
+# Remove a potentially pre-existing server.pid for Rails
+rm -f /app/tmp/pids/server.pid
+
+# Then exec the container's main process
+exec "$@"
+```
+
+##### Configuration Railway (`railway.toml`)
+```toml
 [build]
-builder = "nixpacks"
-buildCommand = "cd backend && bundle install"
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-startCommand = "cd backend && bundle exec rails server -b 0.0.0.0"
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 ```
 
-> **Note** : La section `[phases.setup]` est nécessaire pour installer Ruby et Bundler dans l'environnement de build. Sans cela, les commandes `bundle` ne fonctionneront pas.
+> **Note** : Cette configuration utilise un Dockerfile explicite pour s'assurer que toutes les dépendances sont correctement installées et configurées.
 
 #### 2. Configuration Frontend (à configurer après le déploiement du backend)
 ```toml
