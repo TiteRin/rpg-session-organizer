@@ -3,10 +3,15 @@ builder = "nixpacks"
 buildCommand = "echo 'No build command needed for monorepo'"
 
 [deploy]
-startCommand = "echo 'No start command needed for monorepo'"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 
 [deploy.services]
-backend = { path = "backend" }
-frontend = { path = "frontend" } 
+backend = { 
+  path = "backend",
+  startCommand = "bundle exec rails server -b 0.0.0.0"
+}
+frontend = { 
+  path = "frontend",
+  startCommand = "npm run preview"
+} 

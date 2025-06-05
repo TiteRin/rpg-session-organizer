@@ -21,13 +21,18 @@ builder = "nixpacks"
 buildCommand = "echo 'No build command needed for monorepo'"
 
 [deploy]
-startCommand = "echo 'No start command needed for monorepo'"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 
 [deploy.services]
-backend = { path = "backend" }
-frontend = { path = "frontend" }
+backend = { 
+  path = "backend",
+  startCommand = "bundle exec rails server -b 0.0.0.0"
+}
+frontend = { 
+  path = "frontend",
+  startCommand = "npm run preview"
+}
 ```
 
 #### 2. Configuration Backend (`backend/railway.toml`)
@@ -156,19 +161,19 @@ Pour chaque environnement :
 
 ### Backend
 
-Pour chaque environnement, configurer :
+Pour chaque environnement, configurer uniquement :
 
 #### Staging
 ```
 RAILS_ENV=staging
-DATABASE_URL=<url-staging>
 ```
 
 #### Production
 ```
 RAILS_ENV=production
-DATABASE_URL=<url-production>
 ```
+
+> **Note** : La variable `DATABASE_URL` est automatiquement configurée par Railway lors de la création de la base de données PostgreSQL. Il n'est pas nécessaire de la définir manuellement.
 
 ### Frontend
 
@@ -234,6 +239,30 @@ railway logs
 - Configurer les limites dans les paramètres du projet
 
 ## Dépannage
+
+### Healthcheck
+
+Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre application est correctement démarrée et fonctionnelle. Par défaut, il essaie d'accéder à l'URL racine ("/") de votre application.
+
+#### Configuration du Healthcheck
+
+1. **Endpoint de Healthcheck**
+   - Un endpoint dédié est configuré à `/api/health`
+   - Il renvoie un statut 200 avec `{ status: 'ok' }`
+   - Cet endpoint est utilisé par Railway pour vérifier l'état de l'application
+
+2. **Configuration Railway**
+   ```toml
+   [deploy]
+   healthcheckPath = "/api/health"
+   healthcheckTimeout = 100
+   ```
+
+3. **Dépannage du Healthcheck**
+   - Si le healthcheck échoue, vérifiez que :
+     - Le serveur Rails écoute sur le port fourni par Railway (`ENV['PORT']`)
+     - L'endpoint `/api/health` est accessible
+     - Les logs de l'application pour identifier d'éventuelles erreurs
 
 ### Problèmes Courants
 

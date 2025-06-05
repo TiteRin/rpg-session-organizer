@@ -4,5 +4,5 @@ buildCommand = "bundle install"
 
 [deploy]
 startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 100 
