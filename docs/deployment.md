@@ -16,7 +16,7 @@ Ce document décrit la procédure de déploiement de l'application sur Railway, 
 
 #### 1. Configuration Backend
 
-##### Dockerfile (`backend/Dockerfile`)
+##### Dockerfile (`Dockerfile` à la racine)
 ```dockerfile
 FROM ruby:3.3.0
 
@@ -29,7 +29,7 @@ RUN apt-get update -qq && \
 # Install bundler
 RUN gem install bundler
 
-# Copy Gemfile and Gemfile.lock from the backend directory
+# Copy Gemfile and Gemfile.lock
 COPY backend/Gemfile backend/Gemfile.lock ./
 
 # Install dependencies
@@ -47,31 +47,19 @@ ENTRYPOINT ["entrypoint.sh"]
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 ```
 
-##### Script d'entrée (`backend/entrypoint.sh`)
-```bash
-#!/bin/bash
-set -e
-
-# Remove a potentially pre-existing server.pid for Rails
-rm -f /app/tmp/pids/server.pid
-
-# Then exec the container's main process
-exec "$@"
-```
+> **Note** : Le Dockerfile est placé à la racine du projet pour faciliter le build dans Railway. Les chemins sont ajustés pour pointer vers les fichiers dans le répertoire `backend/`.
 
 ##### Configuration Railway (`railway.toml`)
 ```toml
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "backend/Dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 ```
-
-> **Note** : Cette configuration utilise un Dockerfile explicite pour s'assurer que toutes les dépendances sont correctement installées et configurées.
 
 #### 2. Configuration Frontend (à configurer après le déploiement du backend)
 ```toml
