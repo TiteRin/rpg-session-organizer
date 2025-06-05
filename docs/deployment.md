@@ -25,15 +25,11 @@ healthcheckPath = "/"
 healthcheckTimeout = 100
 
 [deploy.services]
-backend = { 
-  path = "backend",
-  startCommand = "bundle exec rails server -b 0.0.0.0"
-}
-frontend = { 
-  path = "frontend",
-  startCommand = "npm run preview"
-}
+backend = { path = "backend" }
+frontend = { path = "frontend" }
 ```
+
+> **Note** : Les commandes de démarrage sont définies dans les fichiers `railway.toml` individuels de chaque service. Le fichier racine ne fait que définir la structure du monorepo.
 
 #### 2. Configuration Backend (`backend/railway.toml`)
 ```toml
@@ -43,7 +39,7 @@ buildCommand = "bundle install"
 
 [deploy]
 startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 ```
 

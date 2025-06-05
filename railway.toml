@@ -7,11 +7,5 @@ healthcheckPath = "/"
 healthcheckTimeout = 100
 
 [deploy.services]
-backend = { 
-  path = "backend",
-  startCommand = "bundle exec rails server -b 0.0.0.0"
-}
-frontend = { 
-  path = "frontend",
-  startCommand = "npm run preview"
-} 
+backend = { path = "backend" }
+frontend = { path = "frontend" } 
