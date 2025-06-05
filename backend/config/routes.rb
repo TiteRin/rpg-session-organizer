@@ -4,11 +4,9 @@ Rails.application.routes.draw do
     resources :sessions, only: [:index, :show, :create] do
       resources :attendances, only: [:create]
     end
-    get 'health', to: 'health#index'
+    # Health check endpoint
+    get 'health', to: 'health#show'
   end
-
-  # Health check endpoint
-  get '/api/health', to: 'api/health#show'
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

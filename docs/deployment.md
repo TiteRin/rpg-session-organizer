@@ -57,7 +57,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/api/health"
+healthcheckPath = "/api/healthcheck"
 healthcheckTimeout = 100
 ```
 
@@ -391,22 +391,53 @@ Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre a
 #### Configuration du Healthcheck
 
 1. **Endpoint de Healthcheck**
-   - Un endpoint dédié est configuré à `/api/health`
-   - Il renvoie un statut 200 avec `{ status: 'ok' }`
+   - Un endpoint dédié est configuré à `/api/healthcheck`
+   - Il renvoie un statut 200 avec `{ status: 'ok', timestamp: Time.current }`
    - Cet endpoint est utilisé par Railway pour vérifier l'état de l'application
 
 2. **Configuration Railway**
    ```toml
    [deploy]
-   healthcheckPath = "/api/health"
+   healthcheckPath = "/api/healthcheck"
    healthcheckTimeout = 100
    ```
 
-3. **Dépannage du Healthcheck**
+3. **Contrôleur de Healthcheck**
+   ```ruby
+   # app/controllers/api/health_controller.rb
+   module Api
+     class HealthController < ApplicationController
+       skip_before_action :verify_authenticity_token
+       skip_before_action :authenticate_user!
+
+       def show
+         render json: { status: 'ok', timestamp: Time.current }
+       end
+     end
+   end
+   ```
+
+4. **Route de Healthcheck**
+   ```ruby
+   # config/routes.rb
+   Rails.application.routes.draw do
+     namespace :api do
+       # Health check endpoint
+       get 'healthcheck', to: 'health#show'
+       # ...
+     end
+   end
+   ```
+
+5. **Dépannage du Healthcheck**
    - Si le healthcheck échoue, vérifiez que :
      - Le serveur Rails écoute sur le port fourni par Railway (`ENV['PORT']`)
-     - L'endpoint `/api/health` est accessible
+     - L'endpoint `/api/healthcheck` est accessible
      - Les logs de l'application pour identifier d'éventuelles erreurs
+   - Pour plus de logs, utilisez le mode debug dans le Dockerfile :
+     ```dockerfile
+     CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "--log-to-stdout", "--debug"]
+     ```
 
 ### Problèmes Courants
 
