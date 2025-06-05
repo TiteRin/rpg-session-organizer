@@ -233,6 +233,7 @@ nixPkgs = ["ruby", "bundler"]
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
+buildContext = "backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
@@ -255,6 +256,7 @@ nixPkgs = ["nodejs", "npm"]
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "frontend/Dockerfile"
+buildContext = "frontend"
 
 [deploy]
 healthcheckPath = "/"
@@ -268,7 +270,8 @@ VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app"
 
 > **Note** : 
 > - Les Dockerfiles sont placés dans leurs répertoires respectifs (`backend/Dockerfile` et `frontend/Dockerfile`)
-> - Les chemins des Dockerfiles dans les fichiers `railway.toml` doivent être relatifs à la racine du projet
+> - Les chemins dans les Dockerfiles sont relatifs au contexte de build spécifié dans `railway.toml`
+> - Le `buildContext` dans `railway.toml` indique le répertoire à partir duquel les fichiers seront copiés
 > - Les variables d'environnement spécifiques à chaque service sont configurées dans l'interface Railway
 > - Chaque service a sa propre configuration dans son répertoire pour une meilleure organisation et maintenance
 

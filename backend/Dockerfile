@@ -10,18 +10,18 @@ RUN apt-get update -qq && \
 RUN gem install bundler
 
 # Copy Gemfile and Gemfile.lock
-COPY backend/Gemfile backend/Gemfile.lock ./
+COPY Gemfile Gemfile.lock ./
 
 # Install dependencies
 RUN bundle install
 
 # Copy the rest of the backend application
-COPY backend/ .
+COPY . .
 
 # Add a script to be executed every time the container starts
-COPY backend/entrypoint.sh /usr/bin/
+COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
-# Start the main process with debug logging
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout", "--debug"] 
+# Start the main process
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout"] 

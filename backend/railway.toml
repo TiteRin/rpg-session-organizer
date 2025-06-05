@@ -4,6 +4,7 @@ nixPkgs = ["ruby", "bundler"]
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
+buildContext = "backend"
 
 [deploy]
 startCommand = "entrypoint.sh"
