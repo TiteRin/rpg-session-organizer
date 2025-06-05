@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+buildCommand = "echo 'No build command needed for monorepo'"
+
+[deploy]
+startCommand = "echo 'No start command needed for monorepo'"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+[deploy.services]
+backend = { path = "backend" }
+frontend = { path = "frontend" } 
