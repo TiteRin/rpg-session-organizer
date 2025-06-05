@@ -174,19 +174,83 @@ production:
 
 ## Environnements
 
-### Structure des Environnements Railway
+### Configuration des Environnements
 
-Dans un même projet Railway, nous configurons deux environnements :
+### 1. Structure des Environnements
+
+Dans Railway, nous configurons deux environnements :
 
 1. **Staging**
    - Branche Git : `staging`
-   - URL : `https://rpg-session-organizer-staging.up.railway.app`
+   - URL Backend : `https://backend-staging.up.railway.app`
+   - URL Frontend : `https://frontend-staging.up.railway.app`
    - Base de données : `rpg-session-organizer-staging-db`
 
 2. **Production**
    - Branche Git : `main`
-   - URL : `https://rpg-session-organizer-prod.up.railway.app`
+   - URL Backend : `https://backend-production.up.railway.app`
+   - URL Frontend : `https://frontend-production.up.railway.app`
    - Base de données : `rpg-session-organizer-prod-db`
+
+### 2. Variables d'Environnement
+
+#### Backend
+
+Pour chaque environnement, configurer dans l'interface Railway :
+
+##### Staging
+```
+RAILS_ENV=staging
+RAILS_MASTER_KEY=<valeur_du_master_key>
+RAILS_LOG_TO_STDOUT=true
+RAILS_SERVE_STATIC_FILES=true
+```
+
+##### Production
+```
+RAILS_ENV=production
+RAILS_MASTER_KEY=<valeur_du_master_key>
+RAILS_LOG_TO_STDOUT=true
+RAILS_SERVE_STATIC_FILES=true
+```
+
+#### Frontend
+
+Pour chaque environnement, configurer dans l'interface Railway :
+
+##### Staging
+```
+VITE_API_URL=https://backend-staging.up.railway.app
+```
+
+##### Production
+```
+VITE_API_URL=https://backend-production.up.railway.app
+```
+
+### 3. Workflow de Déploiement
+
+1. **Développement**
+   - Travailler sur des branches feature
+   - Utiliser SQLite en local
+   - Tester avec `npm run dev` (frontend) et `rails s` (backend)
+
+2. **Staging**
+   - Merger les features dans la branche `staging`
+   - Déploiement automatique sur l'environnement de staging
+   - Tests et validation
+   - URL : `https://frontend-staging.up.railway.app`
+
+3. **Production**
+   - Merger `staging` dans `main`
+   - Déploiement automatique sur l'environnement de production
+   - URL : `https://frontend-production.up.railway.app`
+
+> **Note** : 
+> - Les variables d'environnement sont configurées dans l'interface Railway pour chaque service
+> - Les URLs des services sont automatiquement générées par Railway
+> - La variable `DATABASE_URL` est automatiquement configurée par Railway
+> - Les credentials Rails sont différents pour chaque environnement
 
 ## Configuration Railway
 
