@@ -6,7 +6,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "bundle exec rails server -b 0.0.0.0"
+startCommand = "bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080}"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 
