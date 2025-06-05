@@ -386,19 +386,20 @@ railway logs
 
 ### Healthcheck
 
-Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre application est correctement démarrée et fonctionnelle. Par défaut, il essaie d'accéder à l'URL racine ("/") de votre application.
+Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre application est correctement démarrée et fonctionnelle.
 
 #### Configuration du Healthcheck
 
 1. **Endpoint de Healthcheck**
-   - Un endpoint dédié est configuré à `/api/healthcheck`
+   - Un endpoint dédié est configuré à `/api/health`
    - Il renvoie un statut 200 avec `{ status: 'ok', timestamp: Time.current }`
    - Cet endpoint est utilisé par Railway pour vérifier l'état de l'application
 
 2. **Configuration Railway**
    ```toml
    [deploy]
-   healthcheckPath = "/api/healthcheck"
+   startCommand = "entrypoint.sh"
+   healthcheckPath = "/api/health"
    healthcheckTimeout = 100
    ```
 
@@ -407,9 +408,6 @@ Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre a
    # app/controllers/api/health_controller.rb
    module Api
      class HealthController < ApplicationController
-       skip_before_action :verify_authenticity_token
-       skip_before_action :authenticate_user!
-
        def show
          render json: { status: 'ok', timestamp: Time.current }
        end
@@ -423,16 +421,89 @@ Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre a
    Rails.application.routes.draw do
      namespace :api do
        # Health check endpoint
-       get 'healthcheck', to: 'health#show'
+       get 'health', to: 'health#show'
        # ...
      end
    end
    ```
 
-5. **Dépannage du Healthcheck**
+5. **Script d'Entrée**
+   ```bash
+   # backend/entrypoint.sh
+   #!/bin/bash
+   set -e
+
+   # Remove a potentially pre-existing server.pid for Rails
+   rm -f /app/tmp/pids/server.pid
+
+   # Then exec the container's main process
+   exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080}
+   ```
+
+6. **Configuration Docker**
+   ```dockerfile
+   # Dockerfile
+   FROM ruby:3.3.0
+
+   WORKDIR /app
+
+   # Install system dependencies
+   RUN apt-get update -qq && \
+       apt-get install -y build-essential libpq-dev
+
+   # Install bundler
+   RUN gem install bundler
+
+   # Copy Gemfile and Gemfile.lock
+   COPY backend/Gemfile backend/Gemfile.lock ./
+
+   # Install dependencies
+   RUN bundle install
+
+   # Copy the rest of the backend application
+   COPY backend/ .
+
+   # Add a script to be executed every time the container starts
+   COPY backend/entrypoint.sh /usr/bin/
+   RUN chmod +x /usr/bin/entrypoint.sh
+   ENTRYPOINT ["entrypoint.sh"]
+   ```
+
+7. **Test en Local**
+
+   a. **Avec le script d'entrée** :
+   ```bash
+   # Dans le dossier backend
+   chmod +x entrypoint.sh
+   PORT=3000 ./entrypoint.sh
+   ```
+
+   b. **Avec la commande Rails directement** :
+   ```bash
+   # Dans le dossier backend
+   PORT=3000 bundle exec rails server -b 0.0.0.0
+   ```
+
+   c. **Avec Docker** (pour simuler l'environnement Railway) :
+   ```bash
+   # À la racine du projet
+   docker build -t rpg-session-organizer .
+   docker run -p 8080:8080 -e PORT=8080 rpg-session-organizer
+   ```
+
+   Test de l'endpoint :
+   ```bash
+   # Si vous utilisez le port 3000
+   curl http://localhost:3000/api/health
+
+   # Si vous utilisez le port 8080
+   curl http://localhost:8080/api/health
+   ```
+
+8. **Dépannage du Healthcheck**
    - Si le healthcheck échoue, vérifiez que :
      - Le serveur Rails écoute sur le port fourni par Railway (`ENV['PORT']`)
-     - L'endpoint `/api/healthcheck` est accessible
+     - L'endpoint `/api/health` est accessible
      - Les logs de l'application pour identifier d'éventuelles erreurs
    - Pour plus de logs, utilisez le mode debug dans le Dockerfile :
      ```dockerfile
