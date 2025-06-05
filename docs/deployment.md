@@ -16,6 +16,29 @@ Ce document décrit la procédure de déploiement de l'application sur Railway, 
 
 #### 1. Configuration Backend
 
+##### Script d'Entrée (`backend/entrypoint.sh`)
+```bash
+#!/bin/bash
+set -e
+
+# Remove a potentially pre-existing server.pid for Rails
+rm -f /app/tmp/pids/server.pid
+
+# Start the Rails server
+exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080} --log-to-stdout
+```
+
+Le script `entrypoint.sh` est un composant crucial du déploiement qui :
+- S'exécute à chaque démarrage du conteneur
+- Nettoie le fichier `server.pid` pour éviter les conflits de démarrage
+- Configure le serveur Rails pour écouter sur toutes les interfaces réseau (`0.0.0.0`)
+- Utilise le port fourni par Railway (`PORT`) ou 8080 par défaut
+- Redirige les logs vers la sortie standard pour une meilleure visibilité dans Railway
+
+Ce script est référencé dans :
+1. Le `Dockerfile` comme point d'entrée du conteneur
+2. Le `railway.toml` comme commande de démarrage
+
 ##### Dockerfile (`Dockerfile` à la racine)
 ```dockerfile
 FROM ruby:3.3.0
@@ -44,21 +67,26 @@ RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
 # Start the main process
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout"]
 ```
 
 > **Note** : Le Dockerfile est placé à la racine du projet pour faciliter le build dans Railway. Les chemins sont ajustés pour pointer vers les fichiers dans le répertoire `backend/`.
 
 ##### Configuration Railway (`railway.toml`)
 ```toml
+[phases.setup]
+nixPkgs = ["ruby", "bundler"]
+
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/api/healthcheck"
-healthcheckTimeout = 100
+startCommand = "entrypoint.sh"
+
+[deploy.services]
+backend = { path = "backend" }
+frontend = { path = "frontend" }
 ```
 
 #### 2. Configuration Frontend (à configurer après le déploiement du backend)
@@ -72,8 +100,6 @@ buildCommand = "cd frontend && npm install && npm run build"
 
 [deploy]
 startCommand = "cd frontend && npm run preview"
-healthcheckPath = "/"
-healthcheckTimeout = 100
 ```
 
 ### Configuration de la Base de Données
@@ -383,132 +409,6 @@ railway logs
 - Configurer les limites dans les paramètres du projet
 
 ## Dépannage
-
-### Healthcheck
-
-Le healthcheck est un mécanisme utilisé par Railway pour vérifier que votre application est correctement démarrée et fonctionnelle.
-
-#### Configuration du Healthcheck
-
-1. **Endpoint de Healthcheck**
-   - Un endpoint dédié est configuré à `/api/health`
-   - Il renvoie un statut 200 avec `{ status: 'ok', timestamp: Time.current }`
-   - Cet endpoint est utilisé par Railway pour vérifier l'état de l'application
-
-2. **Configuration Railway**
-   ```toml
-   [deploy]
-   startCommand = "entrypoint.sh"
-   healthcheckPath = "/api/health"
-   healthcheckTimeout = 100
-   ```
-
-3. **Contrôleur de Healthcheck**
-   ```ruby
-   # app/controllers/api/health_controller.rb
-   module Api
-     class HealthController < ApplicationController
-       def show
-         render json: { status: 'ok', timestamp: Time.current }
-       end
-     end
-   end
-   ```
-
-4. **Route de Healthcheck**
-   ```ruby
-   # config/routes.rb
-   Rails.application.routes.draw do
-     namespace :api do
-       # Health check endpoint
-       get 'health', to: 'health#show'
-       # ...
-     end
-   end
-   ```
-
-5. **Script d'Entrée**
-   ```bash
-   # backend/entrypoint.sh
-   #!/bin/bash
-   set -e
-
-   # Remove a potentially pre-existing server.pid for Rails
-   rm -f /app/tmp/pids/server.pid
-
-   # Then exec the container's main process
-   exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-8080}
-   ```
-
-6. **Configuration Docker**
-   ```dockerfile
-   # Dockerfile
-   FROM ruby:3.3.0
-
-   WORKDIR /app
-
-   # Install system dependencies
-   RUN apt-get update -qq && \
-       apt-get install -y build-essential libpq-dev
-
-   # Install bundler
-   RUN gem install bundler
-
-   # Copy Gemfile and Gemfile.lock
-   COPY backend/Gemfile backend/Gemfile.lock ./
-
-   # Install dependencies
-   RUN bundle install
-
-   # Copy the rest of the backend application
-   COPY backend/ .
-
-   # Add a script to be executed every time the container starts
-   COPY backend/entrypoint.sh /usr/bin/
-   RUN chmod +x /usr/bin/entrypoint.sh
-   ENTRYPOINT ["entrypoint.sh"]
-   ```
-
-7. **Test en Local**
-
-   a. **Avec le script d'entrée** :
-   ```bash
-   # Dans le dossier backend
-   chmod +x entrypoint.sh
-   PORT=3000 ./entrypoint.sh
-   ```
-
-   b. **Avec la commande Rails directement** :
-   ```bash
-   # Dans le dossier backend
-   PORT=3000 bundle exec rails server -b 0.0.0.0
-   ```
-
-   c. **Avec Docker** (pour simuler l'environnement Railway) :
-   ```bash
-   # À la racine du projet
-   docker build -t rpg-session-organizer .
-   docker run -p 8080:8080 -e PORT=8080 rpg-session-organizer
-   ```
-
-   Test de l'endpoint :
-   ```bash
-   # Si vous utilisez le port 3000
-   curl http://localhost:3000/api/health
-
-   # Si vous utilisez le port 8080
-   curl http://localhost:8080/api/health
-   ```
-
-8. **Dépannage du Healthcheck**
-   - Si le healthcheck échoue, vérifiez que :
-     - Le serveur Rails écoute sur le port fourni par Railway (`ENV['PORT']`)
-     - L'endpoint `/api/health` est accessible
-     - Les logs de l'application pour identifier d'éventuelles erreurs
-   - Pour plus de logs, utilisez le mode debug dans le Dockerfile :
-     ```dockerfile
-     CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "--log-to-stdout", "--debug"]
-     ```
 
 ### Problèmes Courants
 
