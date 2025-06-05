@@ -1,8 +1,0 @@
-[build]
-builder = "nixpacks"
-buildCommand = "bundle install"
-
-[deploy]
-startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/api/health"
-healthcheckTimeout = 100 
