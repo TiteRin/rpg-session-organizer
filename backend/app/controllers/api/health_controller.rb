@@ -1,7 +1,10 @@
 module Api
   class HealthController < ApplicationController
-    def index
-      render json: { status: 'ok' }, status: :ok
+    skip_before_action :verify_authenticity_token
+    skip_before_action :authenticate_user!
+
+    def show
+      render json: { status: 'ok', timestamp: Time.current }
     end
   end
 end 
