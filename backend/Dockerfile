@@ -1,7 +1,3 @@
-# syntax = docker/dockerfile:1
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.3.0
 FROM ruby:3.3.0
 
 WORKDIR /app
@@ -13,7 +9,7 @@ RUN apt-get update -qq && \
 # Install bundler
 RUN gem install bundler
 
-# Copy Gemfile and Gemfile.lock from the backend directory
+# Copy Gemfile and Gemfile.lock
 COPY backend/Gemfile backend/Gemfile.lock ./
 
 # Install dependencies
@@ -27,5 +23,5 @@ COPY backend/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
-# Start the main process
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+# Start the main process with debug logging
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout", "--debug"] 

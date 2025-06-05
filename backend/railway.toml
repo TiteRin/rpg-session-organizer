@@ -1,15 +1,18 @@
 [phases.setup]
-nixPkgs = ["nodejs", "npm"]
+nixPkgs = ["ruby", "bundler"]
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-healthcheckPath = "/"
+startCommand = "entrypoint.sh"
+healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [deploy.env]
-VITE_API_URL = "https://rpg-session-organizer-staging.up.railway.app" 
+RAILS_ENV = "production"
+RAILS_LOG_TO_STDOUT = "true"
+RAILS_SERVE_STATIC_FILES = "true" 
