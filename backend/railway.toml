@@ -1,10 +1,14 @@
+[phases.setup]
+nixPkgs = ["ruby", "bundler"]
+
 [build]
-builder = "nixpacks"
-buildCommand = "bundle install"
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+buildContext = "backend"
+watchPaths = ["backend/**/*"]
 
 [deploy]
-startCommand = "bundle exec rails server -b 0.0.0.0"
-healthcheckPath = "/"
-healthcheckTimeout = 100
-restartPolicyType = "on-failure"
+startCommand = "entrypoint.sh"
+
+restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10 

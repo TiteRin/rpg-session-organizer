@@ -24,13 +24,13 @@ test:
 staging:
   <<: *default
   adapter: postgresql
-  url: <%= ENV['DATABASE_URL'] %>
-  database: <%= ENV['DATABASE_URL'].split('/').last %>
+  url: <%= ENV.fetch('DATABASE_URL') { 'postgresql://localhost/rpg_session_organizer_staging' } %>
+  database: <%= ENV.fetch('DATABASE_URL', 'postgresql://localhost/rpg_session_organizer_staging').split('/').last %>
   encoding: unicode
 
 production:
   <<: *default
   adapter: postgresql
-  url: <%= ENV['DATABASE_URL'] %>
-  database: <%= ENV['DATABASE_URL'].split('/').last %>
+  url: <%= ENV.fetch('DATABASE_URL') { 'postgresql://localhost/rpg_session_organizer_production' } %>
+  database: <%= ENV.fetch('DATABASE_URL', 'postgresql://localhost/rpg_session_organizer_production').split('/').last %>
   encoding: unicode
