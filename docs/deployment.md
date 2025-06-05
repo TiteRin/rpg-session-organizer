@@ -235,13 +235,23 @@ VITE_API_URL=https://backend-production.up.railway.app
    - Utiliser SQLite en local
    - Tester avec `npm run dev` (frontend) et `rails s` (backend)
 
-2. **Staging**
+2. **Vérification du Build**
+   - Avant de déployer, tester le build localement :
+     ```bash
+     # Dans le dossier frontend
+     npm run build    # Construit l'application
+     npm run preview  # Lance un serveur local pour tester la version de production
+     ```
+   - Vérifier que tout fonctionne correctement
+   - Corriger les erreurs éventuelles avant de déployer
+
+3. **Staging**
    - Merger les features dans la branche `staging`
    - Déploiement automatique sur l'environnement de staging
    - Tests et validation
    - URL : `https://frontend-staging.up.railway.app`
 
-3. **Production**
+4. **Production**
    - Merger `staging` dans `main`
    - Déploiement automatique sur l'environnement de production
    - URL : `https://frontend-production.up.railway.app`
@@ -251,6 +261,7 @@ VITE_API_URL=https://backend-production.up.railway.app
 > - Les URLs des services sont automatiquement générées par Railway
 > - La variable `DATABASE_URL` est automatiquement configurée par Railway
 > - Les credentials Rails sont différents pour chaque environnement
+> - Toujours tester le build localement avant de déployer pour éviter les surprises
 
 ## Configuration Railway
 
