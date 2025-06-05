@@ -23,5 +23,5 @@ COPY backend/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
-# Start the main process
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout"] 
+# Start the main process with debug logging
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "${PORT:-8080}", "--log-to-stdout", "--debug"] 
