@@ -176,21 +176,118 @@ Pour chaque environnement :
 
 ## Variables d'environnement
 
+### Template des Variables d'Environnement
+
+Des fichiers de template sont fournis dans le dossier `backend/` pour servir de référence pour les variables d'environnement nécessaires. Ces fichiers ne contiennent pas de valeurs sensibles mais documentent toutes les variables requises pour chaque environnement.
+
+#### Développement Local (`.env.example`)
+```bash
+# Rails Environment
+RAILS_ENV=development
+RAILS_MASTER_KEY=your_master_key_here
+
+# Database Configuration
+DATABASE_URL=postgresql://localhost/rpg_session_organizer_development
+
+# Server Configuration
+RAILS_MAX_THREADS=5
+PORT=3000
+
+# Logging
+RAILS_LOG_LEVEL=debug
+
+# Frontend API URL (for development)
+VITE_API_URL=http://localhost:3000
+
+# Add your custom environment variables below
+# MY_CUSTOM_VAR=value
+```
+
+#### Staging (`.env.staging.example`)
+```bash
+# Rails Environment
+RAILS_ENV=staging
+RAILS_MASTER_KEY=your_master_key_here
+
+# Database Configuration
+# DATABASE_URL is automatically set by Railway
+
+# Server Configuration
+RAILS_MAX_THREADS=5
+PORT=8080
+
+# Logging
+RAILS_LOG_LEVEL=info
+
+# Frontend API URL
+VITE_API_URL=https://rpg-session-organizer-staging-backend.up.railway.app
+
+# Add your custom environment variables below
+# MY_CUSTOM_VAR=value
+```
+
+#### Production (`.env.production.example`)
+```bash
+# Rails Environment
+RAILS_ENV=production
+RAILS_MASTER_KEY=your_master_key_here
+
+# Database Configuration
+# DATABASE_URL is automatically set by Railway
+
+# Server Configuration
+RAILS_MAX_THREADS=5
+PORT=8080
+
+# Logging
+RAILS_LOG_LEVEL=info
+
+# Frontend API URL
+VITE_API_URL=https://rpg-session-organizer-prod-backend.up.railway.app
+
+# Add your custom environment variables below
+# MY_CUSTOM_VAR=value
+```
+
+Pour utiliser ces templates :
+1. Copier le fichier approprié vers `.env` : 
+   ```bash
+   # Pour le développement local
+   cp backend/.env.example backend/.env
+   
+   # Pour le staging
+   cp backend/.env.staging.example backend/.env.staging
+   
+   # Pour la production
+   cp backend/.env.production.example backend/.env.production
+   ```
+2. Remplir les valeurs appropriées dans le fichier copié
+3. Ne jamais commiter les fichiers `.env*` dans le dépôt Git
+
+> **Note** : 
+> - Les fichiers `.env*` sont déjà dans `.gitignore` pour éviter tout commit accidentel
+> - Les fichiers de template (`.env*.example`) doivent être commités dans le dépôt
+> - La variable `DATABASE_URL` est automatiquement configurée par Railway pour les environnements de staging et production
+
 ### Backend
 
-Pour chaque environnement, configurer uniquement :
+Pour chaque environnement, configurer :
 
 #### Staging
 ```
 RAILS_ENV=staging
+RAILS_MASTER_KEY=<valeur_du_master_key>
 ```
 
 #### Production
 ```
 RAILS_ENV=production
+RAILS_MASTER_KEY=<valeur_du_master_key>
 ```
 
-> **Note** : La variable `DATABASE_URL` est automatiquement configurée par Railway lors de la création de la base de données PostgreSQL. Il n'est pas nécessaire de la définir manuellement.
+> **Note** : 
+> - La variable `DATABASE_URL` est automatiquement configurée par Railway lors de la création de la base de données PostgreSQL. Il n'est pas nécessaire de la définir manuellement.
+> - La variable `RAILS_MASTER_KEY` doit être la même que celle utilisée localement pour chiffrer/déchiffrer les credentials. Vous pouvez la trouver dans le fichier `backend/config/master.key`.
 
 ### Frontend
 
@@ -205,6 +302,36 @@ VITE_API_URL=https://rpg-session-organizer-staging-backend.up.railway.app
 ```
 VITE_API_URL=https://rpg-session-organizer-prod-backend.up.railway.app
 ```
+
+## Configuration des Credentials
+
+### Génération des Credentials
+
+Pour chaque environnement (staging et production), il est nécessaire de générer des credentials :
+
+```bash
+# Pour l'environnement de staging
+RAILS_ENV=staging bin/rails credentials:edit
+
+# Pour l'environnement de production
+RAILS_ENV=production bin/rails credentials:edit
+```
+
+### Structure des Credentials
+
+Les credentials sont stockés dans des fichiers chiffrés :
+- Staging : `backend/config/credentials/staging.yml.enc`
+- Production : `backend/config/credentials/production.yml.enc`
+
+Ces fichiers sont chiffrés avec la clé maître stockée dans `backend/config/master.key`.
+
+### Sécurité
+
+> **Important** :
+> - Ne jamais commiter le fichier `master.key` dans le dépôt Git
+> - Ne jamais exposer la valeur de `RAILS_MASTER_KEY` publiquement
+> - Utiliser des valeurs différentes pour les credentials de staging et de production
+> - Stocker la valeur de `RAILS_MASTER_KEY` de manière sécurisée dans Railway
 
 ## Déploiement
 
