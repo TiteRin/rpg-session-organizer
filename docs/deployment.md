@@ -309,6 +309,7 @@ nixPkgs = ["ruby", "bundler"]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 buildContext = "backend"
+watchPaths = ["backend/**/*"]  # Ne rebuild que si des fichiers dans backend/ sont modifiés
 
 [deploy]
 startCommand = "entrypoint.sh"
@@ -325,6 +326,7 @@ nixPkgs = ["nodejs", "npm"]
 builder = "DOCKERFILE"
 dockerfilePath = "frontend/Dockerfile"
 buildContext = "frontend"
+watchPaths = ["frontend/**/*"]  # Ne rebuild que si des fichiers dans frontend/ sont modifiés
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
@@ -335,6 +337,7 @@ restartPolicyMaxRetries = 10
 > - Les Dockerfiles sont placés dans leurs répertoires respectifs (`backend/Dockerfile` et `frontend/Dockerfile`)
 > - Les chemins dans les Dockerfiles sont relatifs au contexte de build spécifié dans `railway.toml`
 > - Le `buildContext` dans `railway.toml` indique le répertoire à partir duquel les fichiers seront copiés
+> - `watchPaths` permet d'optimiser les builds en ne reconstruisant que si les fichiers spécifiés sont modifiés
 > - Les variables d'environnement doivent être configurées dans l'interface Railway pour une meilleure sécurité et flexibilité
 > - Chaque service a sa propre configuration dans son répertoire pour une meilleure organisation et maintenance
 

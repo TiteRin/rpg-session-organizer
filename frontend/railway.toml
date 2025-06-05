@@ -5,6 +5,7 @@ nixPkgs = ["nodejs", "npm"]
 builder = "DOCKERFILE"
 dockerfilePath = "frontend/Dockerfile"
 buildContext = "frontend"
+watchPaths = ["frontend/**/*"]
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
