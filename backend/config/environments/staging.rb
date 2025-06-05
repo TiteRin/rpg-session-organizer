@@ -52,4 +52,8 @@ Rails.application.configure do
   ]
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/api/health" } }
+
+  # Allow requests from Railway domain
+  config.hosts << ".up.railway.app"
+  config.hosts << "rpg-session-organizer-staging.up.railway.app"
 end 
