@@ -5,7 +5,6 @@ import SessionDetail from '../views/SessionDetail.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/sessions'
   },
   {
     path: '/sessions',
